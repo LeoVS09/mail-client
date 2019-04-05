@@ -1,8 +1,12 @@
 import {decode} from "./utils";
 
-export function listMessages(gmail, userId = 'me') {
+export function listMessages(gmail, pageToken, userId = 'me') {
     return new Promise((resolve, reject) => {
-        gmail.users.messages.list({userId}, (err, res) => {
+        let request = {userId}
+        if(pageToken)
+            request = {...request, pageToken}
+
+        gmail.users.messages.list(request, (err, res) => {
             if (err) return reject(err)
 
             resolve(res.data)
@@ -10,12 +14,26 @@ export function listMessages(gmail, userId = 'me') {
     })
 }
 
-export function getMessage(gmail, id, userId = 'me') {
+export function getFullMessage(gmail, id, userId = 'me') {
     return new Promise((resolve, reject) => {
         gmail.users.messages.get({
             userId,
             id,
             format: 'full'
+        }, (err, res) => {
+            if(err) return reject(err)
+
+            resolve(res.data)
+        })
+    })
+}
+
+export function getMetaMessage(gmail, id, userId = 'me') {
+    return new Promise((resolve, reject) => {
+        gmail.users.messages.get({
+            userId,
+            id,
+            format: 'metadata'
         }, (err, res) => {
             if(err) return reject(err)
 
@@ -40,6 +58,9 @@ export function getFullMessageText(message) {
     const {payload: {body, parts}} = message
     if(body && body.data)
         return decode(body.data)
+
+    if(!parts || !parts.length)
+        return null
 
     return parts.reduce((result, {body}) =>
         result + '\n---\n' + decode(body.data)

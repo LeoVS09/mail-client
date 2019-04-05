@@ -1,30 +1,31 @@
 import {remote} from 'electron'
-import {authorize} from "./auth";
-import {getFullMessageText, getMessage, getMessageHeaders, listMessages} from "./messages";
+import {authenticate} from "./auth";
+import {getFullMessageText, getFullMessage, getMessageHeaders, listMessages} from "./messages";
 const {google} = remote.require('googleapis')
 
 export {
     getFullMessageText,
     getMessageHeaders,
-    getMessage,
-    listMessages
+    getFullMessage,
+    listMessages,
+    getMetaMessage
 } from './messages'
 
-export async function authorizeGmail() {
-    const auth = await authorize()
+export async function authenticateGmail() {
+    const auth = await authenticate()
     return google.gmail({version: 'v1', auth})
 }
 
 export async function loadMails() {
     console.log('Start load mails')
 
-    const gmail = await authorizeGmail()
+    const gmail = await authenticateGmail()
     const {messages, nextPageToken } = await listMessages(gmail)
     console.log("messages", messages)
     console.log('nextPageToken', nextPageToken)
 
     for(let i = 0; i < 10; i++) {
-        const message = await getMessage(gmail, messages[i].id)
+        const message = await getFullMessage(gmail, messages[i].id)
         const headers = getMessageHeaders(message)
         const text = getFullMessageText(message)
         console.log('Message', headers, '\n', text)

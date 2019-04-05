@@ -12,7 +12,7 @@ const SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 const TOKEN_PATH = 'token.json'
 const CREDENTIALS_PATH = './credentials.json'
 
-export async function authorize() {
+export async function authenticate() {
     const credentials = await readFile(CREDENTIALS_PATH)
 
     // eslint-disable-next-line
