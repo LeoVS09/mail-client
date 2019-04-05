@@ -1,4 +1,5 @@
 import {getFullMessageText, getMessageHeaders} from "../core";
+import {extractAttachments} from "../core/messages";
 
 export const ApiStatus = {
     NONE: 'NONE',
@@ -13,13 +14,16 @@ export class State {
     currentPageToken = null
     prevPageTokens = []
     status = ApiStatus.NONE
+    query = ''
 
-    currentMessage = null
+    currentMessageId = null
 
 }
 
 export class Message {
     constructor(messageResponse) {
+        this.messageResponse = messageResponse
+
         this.id = messageResponse.id
         const headers = getMessageHeaders(messageResponse)
 
@@ -28,5 +32,7 @@ export class Message {
         this.to = headers['To']
 
         this.text = getFullMessageText(messageResponse)
+
+        this.attachments = extractAttachments(messageResponse)
     }
 }

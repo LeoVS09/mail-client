@@ -19,6 +19,8 @@ export const writeFile = (fileName, content) => new Promise((resolve, reject) =>
 })
 
 export function decode(input) {
+    if(!input)
+        return ''
     const decodedBase64 = atob(input.replace(/-/g, '+').replace(/_/g, '/'))
     const escaped = escape(decodedBase64)
     return decodeURIComponent(escaped)

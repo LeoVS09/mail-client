@@ -1,6 +1,9 @@
 import {ACTIONS, MUTATIONS} from "./types";
 import {ApiStatus, Message} from "./state";
 import {authenticateGmail, getFullMessage, getMetaMessage, listMessages} from "../core";
+import router from '../router'
+import routes from '../router/routes'
+import {loadAttachment} from "../core/messages";
 
 let gmail = null
 
@@ -18,19 +21,19 @@ export default {
         if (state.status !== ApiStatus.AUTHENTICATED)
             return console.error('Cannot load messages before authenticate')
 
-        const {messages, nextPageToken} = await listMessages(gmail, pageToken, state.userId)
+        const {messages, nextPageToken} = await listMessages(gmail, pageToken, state.query, state.userId)
 
         commit(MUTATIONS.SET_CURRENT_PAGE_TOKEN, pageToken)
         commit(MUTATIONS.SET_MESSAGES, [])
         commit(MUTATIONS.SET_NEXT_PAGE_TOKEN, nextPageToken)
 
-        const forLoading = messages.slice(0, 10)
+        const forLoading = messages.slice(0, 30)
 
-        for (const m of forLoading) {
+        await Promise.all(forLoading.map(async m => {
             const message = await getMetaMessage(gmail, m.id, state.userId)
             console.log('Loaded message', message)
-            commit(MUTATIONS.PUSH_MESSAGE_TO_LIST, new Message(message))
-        }
+            commit(MUTATIONS.UPDATE_MESSAGE, new Message(message))
+        }))
     },
 
     async [ACTIONS.LOAD_NEXT_PAGE]({commit, state, dispatch}) {
@@ -56,13 +59,30 @@ export default {
     async [ACTIONS.OPEN_MESSAGE]({commit, state}, index) {
         let message = state.messages[index]
 
-        if (message.text)
-            return commit(MUTATIONS.SET_CURRENT_MESSAGE, message)
+        commit(MUTATIONS.SET_CURRENT_MESSAGE, message.id)
+        router.push({name: routes.MESSAGE, params: {id: message.id}})
 
+        if (message.text)
+            return
+
+        console.log('start load message')
         const fullMessage = await getFullMessage(gmail, message.id, state.userId)
+        console.log('full message', fullMessage)
+
         message = new Message(fullMessage)
 
-        commit(MUTATIONS.SET_CURRENT_MESSAGE, message)
-        commit(MUTATIONS.UPDATE_MESSAGE, {message, index})
+        console.log('message loaded')
+        commit(MUTATIONS.UPDATE_MESSAGE, message)
+    },
+
+    async [ACTIONS.UPDATE_QUERY]({commit, state}, text) {
+        commit(MUTATIONS.UPDATE_QUERY, text)
+    },
+
+    async [ACTIONS.LOAD_ATTACHMENT]({commit, state}, {message, attachment: a}) {
+        console.log('start loading')
+        const attachment = await loadAttachment(gmail, message.messageResponse, a.id, state.userId)
+        console.log('attachment', attachment)
+
     }
 }

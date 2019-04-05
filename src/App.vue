@@ -1,19 +1,13 @@
 <template>
     <div id="app">
-        <div id="nav">
-            <h1>User: {{userId}}</h1>
-            <router-link to="/">Home</router-link>
-            <router-link to="/about">About</router-link>
+        <div class="view">
+            <div class="left-view">
+                <messages-list/>
+            </div>
+            <div class="center-view">
+                <router-view/>
+            </div>
         </div>
-        <div class="message-list">
-            <h1>Messages {{messages.length}}</h1>
-            <ul>
-                <li :key="" v-for="m of messages">
-                    Subject: {{m.subject}}
-                </li>
-            </ul>
-        </div>
-        <router-view/>
     </div>
 </template>
 
@@ -21,13 +15,17 @@
     import Vue from 'vue'
     import Component from 'vue-class-component'
     import {State, Action} from 'vuex-class'
+    import MessagesList from './components/MessagesList'
     import {ACTIONS} from './store'
 
-    @Component
+    @Component({
+        components: {
+            MessagesList
+        }
+    })
     export default class App extends Vue {
 
         @State(({userId}) => userId) userId
-        @State(({messages}) => messages) messages
 
         @Action(ACTIONS.AUTHENTICATE) auth
         @Action(ACTIONS.LOAD_MESSAGES) loadMessages
@@ -47,12 +45,20 @@
 </script>
 
 <style lang="scss">
+    @import url('https://fonts.googleapis.com/css?family=Roboto');
+
+    html, body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+    }
+
     #app {
-        font-family: 'Avenir', Helvetica, Arial, sans-serif;
+        font-family: 'Roboto', Helvetica, Arial, sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
-        text-align: center;
-        color: #2c3e50;
+        width: 100%;
+        height: 100%;
     }
 
     #nav {
@@ -66,5 +72,23 @@
                 color: #42b983;
             }
         }
+    }
+
+    .view {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        height: 100%;
+    }
+
+    .left-view {
+        flex: 1;
+        min-width: 30vw;
+    }
+
+    .center-view {
+        flex: 3;
+        height: 100%;
+        max-width: 70vw;
     }
 </style>
