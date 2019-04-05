@@ -2,9 +2,6 @@
 node_modules
 /dist
 
-/tests/e2e/reports/
-selenium-debug.log
-
 # local env files
 .env.local
 .env.*.local
@@ -22,6 +19,8 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw*
+credentials.json
+token.json
 
 #Electron-builder output
 /dist_electron
