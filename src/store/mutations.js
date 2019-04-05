@@ -18,15 +18,11 @@ export default {
         state.prevPageTokens.push(token)
     },
 
-    [MUTATIONS.SET_CURRENT_MESSAGE](state, id) {
-        state.currentMessageId = id
-    },
-
     [MUTATIONS.SET_API_STATUS](state, status) {
         state.status = status
     },
 
-    [MUTATIONS.UPDATE_MESSAGE](state, message) {
+    [MUTATIONS.SAVE_MESSAGE](state, message) {
         const index = state.messages.findIndex(({id}) => id === message.id)
         console.log('index', index)
         if(index !== -1) {

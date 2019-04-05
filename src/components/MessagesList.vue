@@ -1,8 +1,14 @@
 <template>
     <div class="messages">
         <div class="search">
-            <input type="text" :value="query" placeholder="search" @input="event => updateQuery(event.target.value)">
-            <button @click="() => find()">Search</button>
+            <input
+                    type="text"
+                    :value="query"
+                    placeholder="search"
+                    @input="event => updateQuery(event.target.value)"
+                    @keyup.enter="find()"
+            >
+            <button @click="find()">Search</button>
         </div>
         <h3>Found {{messages.length}}</h3>
         <div class="messages-list">
@@ -27,7 +33,7 @@
 
         @Action(ACTIONS.OPEN_MESSAGE) openMessage
         @Action(ACTIONS.UPDATE_QUERY) updateQuery
-        @Action(ACTIONS.LOAD_MESSAGES) find
+        @Action(ACTIONS.LOAD_MESSAGES_LIST) find
     }
 </script>
 

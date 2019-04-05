@@ -16,8 +16,6 @@ export class State {
     status = ApiStatus.NONE
     query = ''
 
-    currentMessageId = null
-
 }
 
 export class Message {

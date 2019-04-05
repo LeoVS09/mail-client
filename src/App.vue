@@ -28,7 +28,7 @@
         @State(({userId}) => userId) userId
 
         @Action(ACTIONS.AUTHENTICATE) auth
-        @Action(ACTIONS.LOAD_MESSAGES) loadMessages
+        @Action(ACTIONS.LOAD_MESSAGES_LIST) loadMessages
 
         // lifecycle hook
         mounted() {

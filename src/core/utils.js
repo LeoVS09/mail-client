@@ -25,3 +25,10 @@ export function decode(input) {
     const escaped = escape(decodedBase64)
     return decodeURIComponent(escaped)
 }
+
+export function decodeAttachment(input) {
+    if(!input)
+        return ''
+
+    return atob(encodeURI(input.replace(/-/g, '+').replace(/_/g, '/')))
+}

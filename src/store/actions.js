@@ -4,6 +4,7 @@ import {authenticateGmail, getFullMessage, getMetaMessage, listMessages} from ".
 import router from '../router'
 import routes from '../router/routes'
 import {loadAttachment} from "../core/messages";
+import {decode, decodeAttachment, writeFile} from "../core/utils";
 
 let gmail = null
 
@@ -17,7 +18,18 @@ export default {
         commit(MUTATIONS.SET_API_STATUS, ApiStatus.AUTHENTICATED)
     },
 
-    async [ACTIONS.LOAD_MESSAGES]({commit, state}, pageToken) {
+    async [ACTIONS.LOAD_MESSAGE]({commit, state}, id) {
+        console.log('start load message')
+        const fullMessage = await getFullMessage(gmail, id, state.userId)
+        console.log('full message', fullMessage)
+
+        const message = new Message(fullMessage)
+
+        console.log('message loaded')
+        commit(MUTATIONS.SAVE_MESSAGE, message)
+    },
+
+    async [ACTIONS.LOAD_MESSAGES_LIST]({commit, dispatch, state}, pageToken) {
         if (state.status !== ApiStatus.AUTHENTICATED)
             return console.error('Cannot load messages before authenticate')
 
@@ -29,10 +41,10 @@ export default {
 
         const forLoading = messages.slice(0, 30)
 
-        await Promise.all(forLoading.map(async m => {
-            const message = await getMetaMessage(gmail, m.id, state.userId)
+        await Promise.all(forLoading.map(async ({id}) => {
+            const message = await getMetaMessage(gmail, id, state.userId)
             console.log('Loaded message', message)
-            commit(MUTATIONS.UPDATE_MESSAGE, new Message(message))
+            commit(MUTATIONS.SAVE_MESSAGE, new Message(message))
         }))
     },
 
@@ -42,7 +54,7 @@ export default {
 
         const currentPageToken = state.currentPageToken
 
-        await dispatch(ACTIONS.LOAD_MESSAGES, state.nextPageToken)
+        await dispatch(ACTIONS.LOAD_MESSAGES_LIST, state.nextPageToken)
         commit(MUTATIONS.PUSH_PREV_PAGE_TOKEN, currentPageToken)
     },
 
@@ -52,27 +64,14 @@ export default {
             return console.error('Not have previous pages')
 
         const prev = prevPageTokens.pop()
-        await dispatch(ACTIONS.LOAD_MESSAGES, prev)
+        await dispatch(ACTIONS.LOAD_MESSAGES_LIST, prev)
 
     },
 
-    async [ACTIONS.OPEN_MESSAGE]({commit, state}, index) {
+    async [ACTIONS.OPEN_MESSAGE]({commit, state, dispatch}, index) {
         let message = state.messages[index]
 
-        commit(MUTATIONS.SET_CURRENT_MESSAGE, message.id)
         router.push({name: routes.MESSAGE, params: {id: message.id}})
-
-        if (message.text)
-            return
-
-        console.log('start load message')
-        const fullMessage = await getFullMessage(gmail, message.id, state.userId)
-        console.log('full message', fullMessage)
-
-        message = new Message(fullMessage)
-
-        console.log('message loaded')
-        commit(MUTATIONS.UPDATE_MESSAGE, message)
     },
 
     async [ACTIONS.UPDATE_QUERY]({commit, state}, text) {
@@ -84,5 +83,19 @@ export default {
         const attachment = await loadAttachment(gmail, message.messageResponse, a.id, state.userId)
         console.log('attachment', attachment)
 
+        const data = attachment.data.data
+        const decoded = decodeAttachment(data)
+        console.log("decoded", decoded)
+        console.log('mimeType', a.mimeType)
+
+        download(a.name, decoded, a.mimeType)
     }
+}
+
+function download(name, text, type) {
+    const a = document.createElement('a')
+    const file = new Blob([text], {type: type});
+    a.href = URL.createObjectURL(file);
+    a.download = name;
+    a.click()
 }

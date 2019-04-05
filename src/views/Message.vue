@@ -25,14 +25,36 @@
 <script>
     import Vue from 'vue'
     import Component from 'vue-class-component'
-    import {Getter, Action} from 'vuex-class'
+    import {State, Action} from 'vuex-class'
     import {ACTIONS} from '../store/types'
 
     @Component
     export default class Message extends Vue {
-        @Getter('currentMessage') message;
+        @State('messages') messages;
+
+        get message() {
+            const {id} = this.$route.params
+            return this.messages.find(m => m.id === id)
+        }
+
+        mounted(){
+            this.loadMessageIfNotHave()
+        }
+
+        updated(){
+            this.loadMessageIfNotHave()
+        }
+
+        loadMessageIfNotHave(){
+            const message = this.message
+            if(message && message.text)
+                return
+
+            this.loadMessage(this.$route.params.id)
+        }
 
         @Action(ACTIONS.LOAD_ATTACHMENT) loadAttachment;
+        @Action(ACTIONS.LOAD_MESSAGE) loadMessage;
 
         get isHaveText() {
             return !!this.message.text
