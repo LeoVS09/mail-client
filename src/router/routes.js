@@ -1,4 +1,5 @@
 export default {
     HOME: 'home',
-    MESSAGE: 'message'
+    MESSAGE: 'message',
+    SEND: 'send'
 }

@@ -36,5 +36,14 @@ export default {
 
     [MUTATIONS.UPDATE_QUERY](state, text) {
         state.query = text
+    },
+
+    [MUTATIONS.SET_EMAIL](state, email) {
+        state.email = email
+    },
+
+    [MUTATIONS.SET_COUNT_MESSAGES](state, count) {
+        state.countMessages = count
     }
+
 }

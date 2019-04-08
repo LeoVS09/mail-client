@@ -30,7 +30,6 @@
         @Action(ACTIONS.AUTHENTICATE) auth
         @Action(ACTIONS.LOAD_MESSAGES_LIST) loadMessages
 
-        // lifecycle hook
         mounted() {
             this.authAndLoadMessages()
         }
@@ -39,7 +38,7 @@
         async authAndLoadMessages() {
             await this.auth()
             await this.loadMessages()
-            console.log(this.messages)
+            console.log(this.attachment)
         }
     }
 </script>

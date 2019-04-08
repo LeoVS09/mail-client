@@ -1,5 +1,4 @@
-import {getFullMessageText, getMessageHeaders} from "../core";
-import {extractAttachments} from "../core/messages";
+import {getFullMessageText, getMessageHeaders, extractAttachments} from "../core";
 
 export const ApiStatus = {
     NONE: 'NONE',
@@ -9,6 +8,8 @@ export const ApiStatus = {
 
 export class State {
     userId = 'me'
+    email = null
+    countMessages = 0
     messages = []
     nextPageToken = null
     currentPageToken = null

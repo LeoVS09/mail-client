@@ -1,10 +1,16 @@
 import {ACTIONS, MUTATIONS} from "./types";
 import {ApiStatus, Message} from "./state";
-import {authenticateGmail, getFullMessage, getMetaMessage, listMessages} from "../core";
-import router from '../router'
-import routes from '../router/routes'
-import {loadAttachment} from "../core/messages";
-import {decode, decodeAttachment, writeFile} from "../core/utils";
+import {
+    authenticateGmail,
+    getFullMessage,
+    getMetaMessage,
+    listMessages,
+    decodeAttachment,
+    loadAttachment,
+    getProfile,
+    sendMessage
+} from "../core";
+import router, {routes} from '../router'
 
 let gmail = null
 
@@ -15,6 +21,10 @@ export default {
 
         commit(MUTATIONS.SET_API_STATUS, ApiStatus.START_AUTHENTICATE)
         gmail = await authenticateGmail()
+        const {emailAddress, messagesTotal} = await getProfile(gmail)
+        console.log('emailAddress', emailAddress, "messagesTotal", messagesTotal)
+        commit(MUTATIONS.SET_EMAIL, emailAddress)
+        commit(MUTATIONS.SET_COUNT_MESSAGES, messagesTotal)
         commit(MUTATIONS.SET_API_STATUS, ApiStatus.AUTHENTICATED)
     },
 
@@ -89,6 +99,12 @@ export default {
         console.log('mimeType', a.mimeType)
 
         download(a.name, decoded, a.mimeType)
+    },
+
+    async [ACTIONS.SEND_MESSAGE]({commit, state}, {to, subject, text}) {
+        console.log('Sending message')
+        await sendMessage(gmail, {from: state.email, to, subject, text})
+        console.log('Message was send')
     }
 }
 
